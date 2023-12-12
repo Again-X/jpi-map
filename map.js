@@ -78,7 +78,7 @@ $(document).ready(function () {
                     <div class="popup__categories">${categories}</div>
                     <hr class="card"/>
                     <div class="popup__description">${feature.properties.Description}</div>
-                    <a href="${feature.properties.Url}" target="_blank"<div class="popup__description">View website</div></a>`
+                    <a href="${feature.properties.Url}"<div class="popup__description">View website</div></a>`
       )
       .addTo(map);
   });

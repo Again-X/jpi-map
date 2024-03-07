@@ -26,9 +26,9 @@ style.innerHTML = `
 }
 .multiselect-dropdown span.optext .optdel {
   float: right;
-  margin: 0 -6px 1px 5px;
-  font-size: 0.7em;
-  margin-top: 2px;
+  margin: -6px -10px 1px 5px;
+  font-weight: 500;
+  font-size: 1em;
   cursor: pointer;
   color: #666;
 }
@@ -244,7 +244,7 @@ function MultiselectDropdown(options) {
               c.appendChild(
                 newEl("span", {
                   class: "optdel",
-                  text: "🗙",
+                  text: "x",
                   title: config.txtRemove,
                   onclick: (ev) => {
                     c.srcOption.listitemEl.dispatchEvent(new Event("click"));

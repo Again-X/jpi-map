@@ -121,6 +121,17 @@ $(document).ready(function () {
 function setNavList(data) {
   //Get list element
   let list = document.getElementById("sideNav__list");
+
+  if (data.length === 0) {
+    list.innerHTML = "<li>No results found</li>";
+
+    //Zoom into feature location
+    map.easeTo({
+      center: [8.169, 51.919],
+      zoom: 4.2,
+    });
+    return;
+  }
   //Remove current items from list
   list.innerHTML = "";
   //For each feature in supplied geoJson make a list item and add it to the element
@@ -270,6 +281,8 @@ function filterMap() {
 
   //Get the country select html element
   const select = document.querySelector("#select--country");
+  //Get the search term
+  const searchTerm = document.querySelector("#search").value;
   //Destructure select options array, filter to include only selected inputs, assign only the text to the array
   const countryArr = [...select.options]
     .filter((option) => option.selected)
@@ -282,20 +295,36 @@ function filterMap() {
     .map((option) => option.text);
 
   //Due to Mapbox's limited ability to filter we must filter the geoJsonData object and then set this new filtered data as the map source.
-  let filteredGeoJson = filterCollection(geoJsonData, countryArr, tagArr);
-  //Set map view to filtered points. Offset the left side by adding a padding equal to the sidebar navigation. Add 70px padding to all sides so the points aren't at the edge of the screen
-  map.fitBounds(turf.bbox(filteredGeoJson), {
-    padding: {
-      left: document.getElementById("sideNav").offsetWidth + 70,
-      top: 70,
-      right: 70,
-      bottom: 70,
-    },
-  });
-  //Set source to new filtered points
-  map.getSource("points").setData(filteredGeoJson);
-  //Update the sideNav with the filtered features
-  setNavList(filteredGeoJson);
+  let filteredGeoJson = filterCollection2(
+    geoJsonData,
+    countryArr,
+    tagArr,
+    searchTerm
+  );
+  //If there are no features in the filteredGeoJson, hide the points and clusters
+  if (filteredGeoJson.features.length === 0) {
+    map.setLayoutProperty("unclustered-point", "visibility", "none");
+    map.setLayoutProperty("clusters", "visibility", "none");
+    map.setLayoutProperty("cluster-count", "visibility", "none");
+    setNavList([]);
+  } else {
+    map.setLayoutProperty("unclustered-point", "visibility", "visible");
+    map.setLayoutProperty("clusters", "visibility", "visible");
+    map.setLayoutProperty("cluster-count", "visibility", "visible");
+    //Set map view to filtered points. Offset the left side by adding a padding equal to the sidebar navigation. Add 70px padding to all sides so the points aren't at the edge of the screen
+    map.fitBounds(turf.bbox(filteredGeoJson), {
+      padding: {
+        left: document.getElementById("sideNav").offsetWidth + 70,
+        top: 70,
+        right: 70,
+        bottom: 70,
+      },
+    });
+    //Set source to new filtered points
+    map.getSource("points").setData(filteredGeoJson);
+    //Update the sideNav with the filtered features
+    setNavList(filteredGeoJson);
+  }
 
   /**
    * Filter given geoJsonData by the supplied arrays
@@ -304,7 +333,7 @@ function filterMap() {
    * @param {array}
    * @param {array}
    */
-  function filterCollection(collection, countryArr, tagArr) {
+  function filterCollection(collection, countryArr, tagArr, searchTerm) {
     let featuresArr = [];
     //Loop through geojson features
     for (var i = 0; i < collection.features.length; i++) {
@@ -349,4 +378,23 @@ function filterMap() {
       features: newArr,
     };
   }
+}
+
+function filterCollection2(collection, countryArr, tagArr, searchTerm) {
+  const filteredCollectionArr = collection.features.filter(
+    (item) =>
+      (searchTerm === "" ||
+        searchTerm == undefined ||
+        item.properties.Title.toLowerCase().includes(
+          searchTerm.toLowerCase()
+        )) &&
+      countryArr.some((country) => country == item.properties.Country) &&
+      (tagArr.length === 0 ||
+        tagArr.some((tag) => item.properties.Categories.includes(tag)))
+  );
+
+  return {
+    type: "FeatureCollection",
+    features: filteredCollectionArr,
+  };
 }

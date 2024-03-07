@@ -153,3 +153,11 @@ li.sideNav__li:hover {
 .customScrollStyle::-webkit-scrollbar-thumb {
   background-color: #46483c;
 }
+.search {
+  width: 233px;
+  padding: 2px 5px 0px 5px;
+  border-radius: 5px;
+  border: none;
+  min-height: 42px;
+  background-color: rgba(234, 240, 243, 0.8);
+}
